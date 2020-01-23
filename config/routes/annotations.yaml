@@ -1,0 +1,9 @@
+data_controller:
+    resource: ../../src/Application/Infrastructure/Http/Data/Controller/
+    type: annotation
+    prefix: /data
+
+view_controller:
+    resource: ../../src/Application/Infrastructure/Http/View/Controller/
+    type: annotation
+    prefix: /view

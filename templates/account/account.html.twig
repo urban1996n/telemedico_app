@@ -1,0 +1,114 @@
+{% extends 'base.html.twig' %}
+{% block titleSufix %}- Lista użytkowników{% endblock %}
+{% block body %}
+<style>
+.list-group li:hover{
+    background-border color:#0000ff;
+    border color:white;
+}
+</style>
+<div style='margin-left:2.5%; margin-top:3%; width:95% !important'>
+    <center><h1> Zmień swoje dane</h1></center>
+    <div class='row'>
+        <div class='border col' >Nazwa</div>
+        <div class='border col' >Imię</div>
+        <div class='border col' >Nazwisko</div>
+        <div class='border col' >Hasło</div>
+        <div class='border col' >Zmień</div>
+    </div>
+    <div class='row'>
+        <div class='border col' ><input class='form-control' id="username" name='username' autocomplete="off"></div>        
+        <div class='border col' ><input class='form-control' id="name" name='name' autocomplete="off"></div>        
+        <div class='border col' ><input class='form-control' id="surname" name='surname' autocomplete="off"></div>        
+        <div class='border col' ><input class='form-control' type='password' id="password" placeholder='Zostaw puste aby nie zmieniać' name='password' autocomplete="off"></div>        
+        <div class='border col'>
+            <button type='submit' onClick="edit()" id='btn-add' class='btn btn-success' style='width:100%;'>
+                Zmień
+            </button>
+        </div>
+    </div>
+    <div class='row'>
+        <button type='submit' onClick='deleteAccount()' id='btn-delete' class='btn btn-danger' style='margin-left:15%;width:70%;'>
+                Usuń konto
+        </button>
+    </div>
+</div>
+
+<script>
+fetch();
+function fetch()
+{
+    $.ajax({
+    url: "{{path('get_my_details')}}",
+    }).fail(function() {
+        showMessage("Coś poszło nie tak","warning");
+    }).done(function(data) {
+        $('#content-box').html('');
+        data = JSON.parse(data);
+        console.log(data);
+        username=data['username'];
+        name=data['name'];
+        surname=data['surname'];
+        $('#username').val(username);
+        $('#name').val(name);
+        $('#surname').val(surname);
+    });
+}
+
+function checkUsername(username){
+    $.ajax({
+        async: true,
+        url: "{{path('check_username')}}",
+        data: {username:username},
+        }).fail(function() {
+            showMessage("Coś poszło nie tak","warning");
+        }).done(function(data) {
+            return data;
+    });
+}
+
+function edit(){
+        name = $('#name').val();
+        surname = $('#surname').val();
+        username = $('#username').val();
+        password = $('#password').val();
+
+        if(!checkUsername(username) && username != "{{app.session.get('username')}}")
+        {
+            showMessage("Taki login istnieje już w bazie danych, wybierz inny.","danger");
+            return false;
+        }
+        if(name.length<1 || surname.length<1 || username.length<1)
+        {
+            showMessage('Uzupełnij prawidłowo wszystkie pola!','danger');
+            return false;
+        }
+        $.ajax({
+        async: true,
+        type:'POST',
+        url: "{{path('account_change_credentials')}}",
+        data: {username:username,password:password,name:name,surname:surname},
+        }).fail(function() {
+            showMessage("Coś poszło nie tak","warning");
+        }).done(function(data) {
+            showMessage("Twoje dane zostały zmienione!","success");
+            fetch();
+        });
+}
+
+function deleteAccount(){
+    var choice = confirm("Czy na pewno chcesz usunąć swoje konto?");
+    if(choice == true)
+    {
+        $.ajax({
+        async: true,
+        url: "{{path('self_account_delete')}}",
+        }).fail(function() {
+            showMessage("Coś poszło nie tak","warning");
+        }).done(function(data) {
+            window.location.replace("{{path('data_logout')}}")
+        });
+    }
+}
+</script>
+{% endblock %}

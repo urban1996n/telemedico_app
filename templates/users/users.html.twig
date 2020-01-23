@@ -1,0 +1,165 @@
+{% extends 'base.html.twig' %}
+{% block titleSufix %}- Lista użytkowników{% endblock %}
+{% block body %}
+<style>
+.list-group li:hover{
+    background-border color:#0000ff;
+    border color:white;
+}
+</style>
+<div style='margin-left:2.5%; margin-top:3%; width:95% !important'>
+    <center><h1> Lista użytkowników</h1></center>
+    <div class='row'>
+        <div class='border col-2' >Rola</div>
+        <div class='border col-2' >Nazwa</div>
+        <div class='border col-2' >Imię</div>
+        <div class='border col-2' >Nazwisko</div>
+        <div class='border col-2' >Hasło</div>
+        <div class='border col-2' >Funkcje</div>
+    </div>
+    <div class='row' id='content-box'>
+        
+    </div>
+    <div class='row'>
+        <div class='border col-2' ><select class='form-control' type="select" id="role" name='role'><option value='1'>Administrator</option><option value='2'>Użytkownik</option></select></div>        
+        <div class='border col-2' ><input class='form-control' id="username" name='username' autocomplete="off"></div>        
+        <div class='border col-2' ><input class='form-control' id="name" name='name' autocomplete="off"></div>        
+        <div class='border col-2' ><input class='form-control' id="surname" name='surname' autocomplete="off"></div>        
+        <div class='border col-2' ><input class='form-control' type='password' id="password" name='password' autocomplete="off"></div>        
+        <div class='border col-2'>
+            <button type='submit' id='btn-add' class='btn btn-success' style='width:100%;'>
+                Dodaj
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+_username = Array();
+_ids = Array();
+fetch();
+
+function fetch()
+{
+    $.ajax({
+    url: "{{path('get_all_accounts')}}",
+    }).fail(function() {
+        showMessage("Coś poszło nie tak","warning");
+    }).done(function(data) {
+        $('#content-box').html('');
+        data = JSON.parse(data);
+        console.log(data);
+        for(var i = 0 ; i < data.length; i++)
+        {
+            _username[i]=data[i]['username'];
+           
+            if(data[i]['role'] == "ROLE_ADMIN")
+            {
+                options = "<option value='1' selected>Administrator</option><option value='2'>Użytkownik</option></select>";
+            }
+            else{
+                options = "<option value='1' >Administrator</option><option selected value='2'>Użytkownik</option></select>";
+            }
+            row = ` 
+                <div class='border col-2' ><select class='form-control' type="select" id='role`+data[i]['id']+`' name='role'>`+options+`</select></div>
+                <div class='border col-2' ><input class='form-control' required type='text' id='username`+data[i]['id']+`' value='`+data[i]['username']+`' style='width:100%' name='productName'></div>
+                <div class='border col-2' ><input class='form-control' required type='text' id='name`+data[i]['id']+`' value='`+data[i]['name']+`' style='width:100%' name='productName'></div>
+                <div class='border col-2' ><input class='form-control' required type='text' id='surname`+data[i]['id']+`' value='`+data[i]['surname']+`' style='width:100%' name='productName'></div>
+                <div class='border col-2' ><input class='form-control' required placeholder='Zostaw puste, aby nie zmieniać' type='password' id='password`+data[i]['id']+`'  style='width:100%' name='productName'></div>
+                <div class='border col-2' >
+                    <button onClick="edit(`+data[i]['id']+`,'`+data[i]['username']+`')" class='btn btn-success btn-edit' data-id='`+data[i]['id']+`' type='button' style='width:100%; margin-bottom:8px;'>Zmień</button><br/>
+                    <button onClick="deleteOne(`+data[i]['id']+`)" class='btn btn-danger btn-edit' data-id='`+data[i]['id']+`' type='button' style='width:100%;'>Usuń</button>
+                </div>
+            `;
+        $('#content-box').append(row);
+        }
+    });
+}
+
+$('#btn-add').click(function(){
+        name = $('#name').val(); 
+        role = $('#role').val();
+        username = $('#username').val();
+        if(_username.includes(username))
+        {
+            showMessage("Taki login istnieje już w bazie danych, wybierz inny.","danger");
+            return false;
+        }
+        
+        surname = $('#surname').val();
+        password = $('#password').val();
+        
+        if(password.length<1)
+        {
+            password = null;
+        }
+
+        if($('#name').val().length<1 )
+        {
+            showMessage('Uzupełnij prawidłowo wszystkie pola!','danger');
+            return false;
+        }
+        
+        $.ajax({
+        async: false,
+        url: "{{path('register_account')}}",
+        data: {username:username,password:password,name:name,surname:surname,role:role},
+        }).fail(function() {
+            showMessage("Coś poszło nie tak","warning");
+        }).done(function(data) {
+            showMessage("Użytkownik został dodany!","success");
+            fetch();
+        });
+});
+
+
+function edit(id,oldname){
+        id = id;
+        role = $('#role'+id).val();
+        name = $('#name'+id).val();
+        username = $('#username'+id).val();
+        if(_username.includes(username) && username != oldname)
+        {
+            showMessage("Taki login istnieje już w bazie danych, wybierz inny.","danger");
+            return false;
+        }
+        surname = $('#surname'+id).val();
+        password = $('#password'+id).val();
+        if(name.length<1 || surname.length<1 || username.length<1)
+        {
+            showMessage('Uzupełnij prawidłowo wszystkie pola!','danger');
+            return false;
+        }
+        $.ajax({
+        async: false,
+        type:'POST',
+        url: "{{path('account_edit')}}",
+        data: {username:username,password:password,name:name,surname:surname,id:id,role:role},
+        }).fail(function() {
+            showMessage("Coś poszło nie tak","warning");
+        }).done(function(data) {
+            showMessage("Dane użytkownika zmienione!","success");
+            window.location.reload();
+        });
+}
+
+function deleteOne(id){
+        id = id
+        var choice = confirm("Czy na pewno chcesz usunąć ten wpis?");
+        if(choice == true)
+        {
+            $.ajax({
+            async: false,
+            url: "{{path('account_delete')}}",
+            data: {id:id},
+            }).fail(function() {
+                showMessage("Coś poszło nie tak","warning");
+            }).done(function(data) {
+                showMessage("Usunięto użytkownika!","success");
+                fetch();
+            });
+        }
+        
+}
+</script>
+{% endblock %}

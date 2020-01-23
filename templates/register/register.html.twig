@@ -1,0 +1,117 @@
+{%extends 'base.html.twig'%}
+{%block nav%}
+{%endblock%}
+{%block body%}
+<head>
+	<title>Login V2</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--===============================================================================================-->	
+	<link rel="stylesheet" type="text/css" href="../../vendor/bootstrap/css/bootstrap.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="../../fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="../../fonts/iconic/css/material-design-iconic-font.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="../../vendor/animate/animate.css">
+<!--===============================================================================================-->	
+	<link rel="stylesheet" type="text/css" href="../../vendor/css-hamburgers/hamburgers.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="../../vendor/animsition/css/animsition.min.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="../../vendor/select2/select2.min.css">
+<!--===============================================================================================-->	
+	<link rel="stylesheet" type="text/css" href="../../vendor/daterangepicker/daterangepicker.css">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="../../css/util.css">
+	<link rel="stylesheet" type="text/css" href="../../css/main.css">
+<!--===============================================================================================-->
+</head>
+<body>
+	
+	<div class="limiter">
+		<div class="container-login100">
+			<div class="wrap-login100">
+				<form class="login100-form validate-form" action="{{path('register_account')}}">
+					<span class="login100-form-title p-b-26">
+						Rejestacja
+					</span>
+					<input type='number' value='0' hidden>
+					<div class="wrap-input100 validate-input" data-validate = "Podaj nazwę użytkownika!">
+						<input class="input100" type="text" id="username" name="username">
+						<span class="focus-input100" data-placeholder="Nazwa użytkownika"></span>
+					</div>
+
+					<div class="wrap-input100 validate-input" data-validate = "Podaj imię!">
+						<input class="input100" type="text" name="name">
+						<span class="focus-input100" data-placeholder="Imię"></span>
+					</div>
+					
+					<div class="wrap-input100 validate-input" data-validate = "Podaj nazwisko!">
+						<input class="input100" type="text" name="surname">
+						<span class="focus-input100" data-placeholder="Nazwisko"></span>
+					</div>
+
+					<div class="wrap-input100 validate-input" data-validate="Wprowadź hasło!">
+						<span class="btn-show-pass">
+							<i class="zmdi zmdi-eye"></i>
+						</span>
+						<input class="input100" type="password" minlength="6" name="password">
+						<span class="focus-input100" data-placeholder="Hasło"></span>
+					</div>
+
+
+					<div class="container-login100-form-btn">
+						<div class="wrap-login100-form-btn">
+							<div class="login100-form-bgbtn"></div>
+							<button id='register-btn' class="login100-form-btn">
+								Rejestracja
+							</button>
+						</div>
+					</div>
+
+				</form>
+			</div>
+		</div>
+	</div>
+	
+<div style='height:2px;overflow:hidden;font-size:2px !important;'>Icons made by <a style='font-size:2px !important;' href="https://www.flaticon.com/authors/srip" title="srip">srip</a> from <a href="https://www.flaticon.com/" 			    title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" 			
+					title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
+	<div id="dropDownSelect1"></div>
+	
+<!--===============================================================================================-->
+	<script src="../../vendor/jquery/jquery-3.2.1.min.js"></script>
+<!--===============================================================================================-->
+	<script src="../../vendor/animsition/js/animsition.min.js"></script>
+<!--===============================================================================================-->
+	<script src="../../vendor/bootstrap/js/popper.js"></script>
+	<script src="../../vendor/bootstrap/js/bootstrap.min.js"></script>
+<!--===============================================================================================-->
+	<script src="../../vendor/select2/select2.min.js"></script>
+<!--===============================================================================================-->
+	<script src="../../vendor/daterangepicker/moment.min.js"></script>
+	<script src="../../vendor/daterangepicker/daterangepicker.js"></script>
+<!--===============================================================================================-->
+	<script src="../../vendor/countdowntime/countdowntime.js"></script>
+<!--===============================================================================================-->
+	<script src="../../js/main.js"></script>
+	<script>
+	$('#username').change(function(){  
+		username = $(this).val();      
+        $.ajax({
+        async: true,
+        url: "{{path('check_username')}}",
+        data: {username:username},
+        }).fail(function() {
+            showMessage("Coś poszło nie tak","warning");
+        }).done(function(data) {
+			if(data == "false"){
+            	showMessage("Login zajęty, wybierz inny!","warning");
+				$('#register-btn').prop('disabled',true);
+			}else{
+				$('#register-btn').prop('disabled',false);
+			}
+        });
+	});
+	</script>
+{%endblock%}
